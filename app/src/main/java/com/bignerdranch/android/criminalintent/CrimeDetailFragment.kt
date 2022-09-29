@@ -13,7 +13,13 @@ class CrimeDetailFragment : Fragment() {
 
     private lateinit var crime: Crime
 
-    private lateinit var binding: FragmentCrimeDetailBinding
+    // Questa doppia variabile serve per poter nullificare binding durante la fase di onDestroyView()
+    private var _binding: FragmentCrimeDetailBinding? = null
+    private val binding
+        get() = checkNotNull(_binding) {
+            "Cannot access binding because it is null. Is the view visible?"
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +39,7 @@ class CrimeDetailFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding =
+        _binding =
             FragmentCrimeDetailBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
@@ -42,17 +48,29 @@ class CrimeDetailFragment : Fragment() {
     // Qui si impostano i listeners
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         binding.apply {
             crimeTitle.doOnTextChanged { text, _, _, _ ->
-                crime = crime.copy(title = text.toString())
+                crime = crime.copy(title = text.toString()) // questo perché i parametri di Crime sono val e non var
             }
 
             crimeDate.apply {
                 text = crime.date.toString()
                 isEnabled = false
             }
+
+            crimeSolved.setOnCheckedChangeListener { _, isChecked ->
+                crime = crime.copy(isSolved = isChecked)
+            }
         }
     }
+
+    // è importante liberare binding per evitare memory leaking nel momento in cui si cambia view
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
 
 
 }
