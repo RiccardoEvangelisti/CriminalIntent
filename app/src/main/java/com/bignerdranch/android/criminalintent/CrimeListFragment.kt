@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bignerdranch.android.criminalintent.databinding.FragmentCrimeListBinding
 import kotlinx.coroutines.launch
@@ -44,7 +45,14 @@ class CrimeListFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // Osserva il Flow dei dati. La lambda viene chiamata ogni volta che il dato cambia
                 crimeListViewModel.crimes.collect { crimes ->
-                    binding.crimeRecyclerView.adapter = CrimeListAdapter(crimes)
+                    // All'Adapter vengono passati i dati del ViewModel e una lambda che performa una azione di navigazione dato un ID
+                    binding.crimeRecyclerView.adapter = CrimeListAdapter(crimes) { crimeId ->
+                        // import fragment version
+                        findNavController().navigate(
+                            // Uso di Safe Args
+                            CrimeListFragmentDirections.showCrimeDetail(crimeId)
+                        )
+                    }
                 }
             }
         }

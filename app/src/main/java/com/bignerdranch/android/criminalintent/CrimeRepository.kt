@@ -3,13 +3,16 @@ package com.bignerdranch.android.criminalintent
 import android.content.Context
 import androidx.room.Room
 import com.bignerdranch.android.criminalintent.database.CrimeDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import java.util.*
 
 private const val DATABASE_NAME = "crime-database"
 
 // Singleton
-class CrimeRepository private constructor(context: Context) {
+class CrimeRepository private constructor(context: Context, private val coroutineScope: CoroutineScope = GlobalScope) {
     companion object {
         private var INSTANCE: CrimeRepository? = null
         fun initialize(context: Context) {
@@ -28,4 +31,11 @@ class CrimeRepository private constructor(context: Context) {
 
     fun getCrimes(): Flow<List<Crime>> = database.crimeDao().getCrimes()
     suspend fun getCrime(id: UUID): Crime = database.crimeDao().getCrime(id)
+    fun updateCrime(crime: Crime) {
+        // Viene utilizzato il GlobalScope
+        coroutineScope.launch {
+            database.crimeDao().updateCrime(crime)
+        }
+    }
+
 }
