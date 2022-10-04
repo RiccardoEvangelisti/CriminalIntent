@@ -6,8 +6,5 @@ import java.util.*
 
 @Entity
 data class Crime(
-    @PrimaryKey val id: UUID,
-    val title: String,
-    val date: Date,
-    val isSolved: Boolean
+	@PrimaryKey val id: UUID, val title: String, val date: Date, val isSolved: Boolean
 )

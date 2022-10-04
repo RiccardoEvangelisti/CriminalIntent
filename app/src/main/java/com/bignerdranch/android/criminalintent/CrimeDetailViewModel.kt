@@ -12,36 +12,38 @@ import java.util.*
 
 // Costruttore possibile solo grazie alla Factory
 class CrimeDetailViewModel(crimeId: UUID) : ViewModel() {
-    private val crimeRepository = CrimeRepository.get()
 
-    // Se l'utente modifica il dato, la UI rimane sempre aggiornata grazie allo State Flow
-    // La UI riceve sempre una versione read-only del dato state flow
-    private val _crime: MutableStateFlow<Crime?> = MutableStateFlow(null)
-    val crime: StateFlow<Crime?> = _crime.asStateFlow()
+	private val crimeRepository = CrimeRepository.get()
 
-    // Il ViewModel si occupa di prelevare i dati appena viene istanziato
-    init {
-        viewModelScope.launch {
-            _crime.value = crimeRepository.getCrime(crimeId)
-        }
-    }
+	// Se l'utente modifica il dato, la UI rimane sempre aggiornata grazie allo State Flow
+	// La UI riceve sempre una versione read-only del dato state flow
+	private val _crime: MutableStateFlow<Crime?> = MutableStateFlow(null)
+	val crime: StateFlow<Crime?> = _crime.asStateFlow()
 
-    fun updateCrime(onUpdate: (Crime) -> Crime) {
-        _crime.update { oldCrime ->
-            oldCrime?.let { onUpdate(it) }
-        }
-    }
+	// Il ViewModel si occupa di prelevare i dati appena viene istanziato
+	init {
+		viewModelScope.launch {
+			_crime.value = crimeRepository.getCrime(crimeId)
+		}
+	}
 
-    // Esegue la update quando ViewModel viene distrutto, ad esempio quando si naviga via dal Fragment annesso
-    override fun onCleared() {
-        super.onCleared()
-        crime.value?.let { crimeRepository.updateCrime(it) }
-    }
+	fun updateCrime(onUpdate: (Crime) -> Crime) {
+		_crime.update { oldCrime ->
+			oldCrime?.let { onUpdate(it) }
+		}
+	}
+
+	// Esegue la update quando ViewModel viene distrutto, ad esempio quando si naviga via dal Fragment annesso
+	override fun onCleared() {
+		super.onCleared()
+		crime.value?.let { crimeRepository.updateCrime(it) }
+	}
 }
 
 // Factory che mi permette di generare un ViewModel con costruttore
 class CrimeDetailViewModelFactory(
-    private val crimeId: UUID
+	private val crimeId: UUID
 ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = CrimeDetailViewModel(crimeId) as T
+
+	override fun <T : ViewModel> create(modelClass: Class<T>): T = CrimeDetailViewModel(crimeId) as T
 }
