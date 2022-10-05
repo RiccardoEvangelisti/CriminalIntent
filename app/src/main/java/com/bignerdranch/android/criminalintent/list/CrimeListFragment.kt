@@ -42,16 +42,21 @@ class CrimeListFragment : Fragment() {
 		super.onViewCreated(view, savedInstanceState)
 		// Coroutine per il prelievo dei dati. Lo scope è quello del ViewModel
 		viewLifecycleOwner.lifecycleScope.launch {
+
 			// Esegue il blocco solo quando la view entra nello stato Started, perché non ha senso caricare i dati quando la UI non è visibile
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				// Osserva il Flow dei dati. La lambda viene chiamata se il dato cambia
+
+				// Il collector osserva il Flow dei dati e la lambda viene chiamata ogni volta che vi è un nuovo dato nel Flow
+				// In questo modo, quando la UI efettua una modifica sul db, il dato mostrato è il più aggiornato
 				crimeListViewModel.crimes.collect { crimes ->
 
 					// RECYCLE VIEW: setting dell'adapter con il dataset
 					binding.crimeRecyclerView.adapter = CrimeListAdapter(crimes) { crimeId ->
-						// NAVIGATOR CONTROLLER
-						// SAFE ARGS
-						findNavController().navigate(CrimeListFragmentDirections.showCrimeDetail(crimeId))
+						// NAVIGATOR CONTROLLER: si può chiamare la destinazione con l'ID della View o usando SafeArgs.
+						// Le azioni sono definite nel nav_graph
+						findNavController().navigate(
+							// SAFE ARGS: "nomeFragment" + "Directions". Gli argomenti sono definiti nel nav_graph.xml
+							CrimeListFragmentDirections.showCrimeDetail(crimeId))
 					}
 				}
 			}

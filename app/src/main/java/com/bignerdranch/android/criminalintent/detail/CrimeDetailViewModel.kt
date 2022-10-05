@@ -22,7 +22,7 @@ class CrimeDetailViewModel(crimeId: UUID) : ViewModel() {
 	private val crimeRepository = CrimeRepository.get()
 
 	// Se l'utente modifica il dato, la UI rimane sempre aggiornata grazie allo State Flow
-	// La UI riceve sempre una versione read-only del dato state flow
+	// *BEST PRACTICE*: La UI riceve sempre una versione read-only del dato state flow
 	private val _crime: MutableStateFlow<Crime?> = MutableStateFlow(null)
 	val crime: StateFlow<Crime?> = _crime.asStateFlow()
 
@@ -33,16 +33,21 @@ class CrimeDetailViewModel(crimeId: UUID) : ViewModel() {
 		}
 	}
 
+	// Funzione chiamata dal Fragment
 	fun updateCrime(onUpdate: (Crime) -> Crime) {
+		// Viene fatto l'update del singolo "_crime" con un nuovo valore restituito dalla lambda
 		_crime.update { oldCrime ->
+			// se il valore dentro lo stateflow è != null allora chiama la lambda passata come parametro
 			oldCrime?.let { onUpdate(it) }
 		}
 	}
 
-	// Esegue la update quando ViewModel viene distrutto, ad esempio quando si naviga via dal Fragment annesso
+	// OnCleared()
+	// 1) Viene eseguita quando ViewModel viene distrutto, ad esempio quando si naviga via dal Fragment annesso
+	// 2) qui si applica la update del dato
 	override fun onCleared() {
 		super.onCleared()
-		crime.value?.let { crimeRepository.updateCrime(it) }
+		crime.value?.let { crime -> crimeRepository.updateCrime(crime) }
 	}
 }
 

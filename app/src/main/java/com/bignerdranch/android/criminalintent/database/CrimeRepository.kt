@@ -11,7 +11,10 @@ import java.util.*
 
 private const val DATABASE_NAME = "crime-database"
 
-// Singleton
+// REPOSITORY PATTERN:
+// 1) una Repository incapsula la logica per accedere alle risorse (uno o più database ad esempio)
+// 2) mette a disposizione della UI i metodi per effettuare le chiamate alle risorse
+// *OBBLIGATORIO*: implementarlo come Singleton e inizializzarlo all'inizio dell'applicazione
 class CrimeRepository private constructor(context: Context, private val coroutineScope: CoroutineScope = GlobalScope) {
 
 	// Singleton
@@ -29,8 +32,9 @@ class CrimeRepository private constructor(context: Context, private val coroutin
 		}
 	}
 
-	// Crea una implementazione concreta del database
+	// Implementazione concreta del database
 	private val database: CrimeDatabase =
+		// crea una concreta implementazione del database
 		Room.databaseBuilder(context.applicationContext, CrimeDatabase::class.java, DATABASE_NAME).createFromAsset(DATABASE_NAME).build()
 
 	fun getCrimes(): Flow<List<Crime>> = database.crimeDao().getCrimes()

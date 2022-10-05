@@ -21,7 +21,7 @@ class CrimeListViewModel : ViewModel() {
 	init {
 		// lancio una coroutine
 		viewModelScope.launch {
-			crimeRepository.getCrimes().collect { _crimes.value = it }
+			crimeRepository.getCrimes().collect { crimes -> _crimes.value = crimes }
 		}
 	}
 }

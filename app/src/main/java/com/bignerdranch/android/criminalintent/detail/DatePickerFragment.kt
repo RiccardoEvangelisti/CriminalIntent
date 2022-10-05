@@ -13,7 +13,6 @@ import androidx.navigation.fragment.navArgs
 
 class DatePickerFragment : DialogFragment() {
 
-	// Il NavController passa il dato da visualizzare
 	private val args: DatePickerFragmentArgs by navArgs()
 
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

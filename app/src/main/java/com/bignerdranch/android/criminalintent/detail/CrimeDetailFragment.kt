@@ -37,7 +37,10 @@ class CrimeDetailFragment : Fragment() {
 			"Cannot access binding because it is null. Is the view visible?"
 		}
 
-	// SAFE ARGS
+	// SAFE ARGS:
+	// 1) "nomeFragment" + "Args"
+	// 2) si usa quando attraverso il navigator si passa da una View all'altra
+	// 3) gli argomenti sono definiti nel nav_graph.xml
 	private val args: CrimeDetailFragmentArgs by navArgs()
 
 	// VIEW MODEL:
@@ -74,10 +77,11 @@ class CrimeDetailFragment : Fragment() {
 			}
 		}
 
+		// Listeners che al cambiamento del dato sulla UI applicano la modifica al ViewModel (UI->ViewModel)
 		binding.apply {
 			crimeTitle.doOnTextChanged { text, _, _, _ ->
 				crimeDetailViewModel.updateCrime { oldCrime ->
-					oldCrime.copy(title = text.toString())
+					oldCrime.copy(title = text.toString()) // viene passata una copia del valore con un attribito cambiato
 				}
 			}
 
@@ -88,7 +92,7 @@ class CrimeDetailFragment : Fragment() {
 			}
 		}
 
-		// Colleziono lo StateFlow e con esso aggiorno la UI
+		// Colleziono lo StateFlow del ViewModel e con esso aggiorno la UI (ViewModel->UI)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
 				crimeDetailViewModel.crime.collect { crime ->
@@ -107,9 +111,10 @@ class CrimeDetailFragment : Fragment() {
 		}
 	}
 
+	// Funzione che applica le modifiche alla UI quando il dato viene modificato
 	private fun updateUi(crime: Crime) {
 		binding.apply {
-			if (crimeTitle.text.toString() != crime.title) { //previene un infinite-loop con il listener
+			if (crimeTitle.text.toString() != crime.title) { // previene un infinite-loop con il listener
 				crimeTitle.setText(crime.title)
 			}
 

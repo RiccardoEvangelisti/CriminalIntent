@@ -21,7 +21,7 @@
 		android:label="CrimeDetailFragment"
 		tools:layout="@layout/fragment_crime_detail">
 
-		<!-- Argomenti del fragment, utilizzando Safe Args -->
+		<!-- Argomenti del fragment, utilizzando SafeArgs -->
 		<argument
 			android:name="crimeId"
 			app:argType="java.util.UUID" />
