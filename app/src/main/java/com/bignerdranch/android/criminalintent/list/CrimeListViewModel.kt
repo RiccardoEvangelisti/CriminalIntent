@@ -1,7 +1,9 @@
-package com.bignerdranch.android.criminalintent
+package com.bignerdranch.android.criminalintent.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bignerdranch.android.criminalintent.database.CrimeRepository
+import com.bignerdranch.android.criminalintent.model.Crime
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

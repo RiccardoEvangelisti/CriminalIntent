@@ -1,4 +1,4 @@
-package com.bignerdranch.android.criminalintent
+package com.bignerdranch.android.criminalintent.list
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,12 +16,14 @@ import kotlinx.coroutines.launch
 
 class CrimeListFragment : Fragment() {
 
+	// VIEW BINDING
 	private var _binding: FragmentCrimeListBinding? = null
 	private val binding
 		get() = checkNotNull(_binding) {
 			"Cannot access binding because it is null. Is the view visible?"
 		}
 
+	// VIEW MODEL
 	private val crimeListViewModel: CrimeListViewModel by viewModels()
 
 	override fun onCreateView(
@@ -29,32 +31,34 @@ class CrimeListFragment : Fragment() {
 	): View {
 		_binding = FragmentCrimeListBinding.inflate(inflater, container, false)
 
+		// RECYCLER VIEW:
+		// Un "LayoutManager" è un componente *necessario* che ha il compito di posizionare gli elementi del RecyclerView
+		// "LinearLayoutManager" dispone gli elementi uno sotto l'altro come il LinearLayout
 		binding.crimeRecyclerView.layoutManager = LinearLayoutManager(context)
 		return binding.root
 	}
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
-		// Eseguo il prelievo dei dati in un viewLifecycleScope, il quale "cancella il lavoro" se la view viene distrutta
-		// (ossia blocca ed elimina l'esecuzione del blocco di codice se questo è ancora in corso
+		// Coroutine per il prelievo dei dati. Lo scope è quello del ViewModel
 		viewLifecycleOwner.lifecycleScope.launch {
-			// Ripete il prelievo dei dati (=esegue una coroutine) ogni volta che la view entra nello stato Started,
-			// quindi rimane in esecuzione se è nello stato Resumed, ma viene "cancellata" se torna nello stato Created
+			// Esegue il blocco solo quando la view entra nello stato Started, perché non ha senso caricare i dati quando la UI non è visibile
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				// Osserva il Flow dei dati. La lambda viene chiamata ogni volta che il dato cambia
+				// Osserva il Flow dei dati. La lambda viene chiamata se il dato cambia
 				crimeListViewModel.crimes.collect { crimes ->
-					// All'Adapter vengono passati i dati del ViewModel e una lambda che performa una azione di navigazione dato un ID
+
+					// RECYCLE VIEW: setting dell'adapter con il dataset
 					binding.crimeRecyclerView.adapter = CrimeListAdapter(crimes) { crimeId ->
-						// import fragment version
-						findNavController().navigate(
-							// Uso di Safe Args
-							CrimeListFragmentDirections.showCrimeDetail(crimeId))
+						// NAVIGATOR CONTROLLER
+						// SAFE ARGS
+						findNavController().navigate(CrimeListFragmentDirections.showCrimeDetail(crimeId))
 					}
 				}
 			}
 		}
 	}
 
+	// VIEW BINDING
 	override fun onDestroyView() {
 		super.onDestroyView()
 		_binding = null

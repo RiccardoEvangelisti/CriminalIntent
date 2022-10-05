@@ -1,4 +1,4 @@
-package com.bignerdranch.android.criminalintent
+package com.bignerdranch.android.criminalintent.detail
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.annotation.RequiresApi
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -17,27 +16,42 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bignerdranch.android.criminalintent.databinding.FragmentCrimeDetailBinding
+import com.bignerdranch.android.criminalintent.model.Crime
 import kotlinx.coroutines.launch
 import java.util.*
 
+// Un Fragment è un componente simile ad Activity, ma più flessibile e manutenibile. Deve essere legato ad una View e hostato da una Activity
+// *ATTENZIONE* usare androidx.fragment.app.Fragment
+// *ATTENZIONE*: non sono un buon posto dove salvare lo stato dell'app
 class CrimeDetailFragment : Fragment() {
 
-	private val args: CrimeDetailFragmentArgs by navArgs()
-
-	// Utilizzo la factory per generare un ViewModel con argomenti
-	private val crimeDetailViewModel: CrimeDetailViewModel by viewModels {
-		CrimeDetailViewModelFactory(args.crimeId)
-	}
-
-	// Questa doppia variabile serve per poter nullificare binding durante la fase di onDestroyView()
+	// VIEW BINDING:
+	// 1) si occupa di collegare il layout al Fragment
+	// 2) fornisce i componenti grafici della view al Fragment
+	// *ATTENZIONE*: Se il layout che si vuole associare è chiamato "fragment_riccardo_eva", il binding si chiama "FragmentRiccardoEvaBinding"
+	// *OBBLIGATORIO* aggiungere la dipendenza in app/build.gradle
+	// *OBBLIGATORIO*: per evitare memory leak quando si cambia View, si usano 2 variabili e rese null nella onDestroyView()
 	private var _binding: FragmentCrimeDetailBinding? = null
 	private val binding
 		get() = checkNotNull(_binding) {
 			"Cannot access binding because it is null. Is the view visible?"
 		}
 
-	// Qui viene fatto l'inflate e bind del layout (serve LayoutInflater e ViewGroup). Ritorna la view alla hosting activity
-	// Non inserire nulla in più in questa funzione ma usare le funzioni chiamate successivamente
+	// SAFE ARGS
+	private val args: CrimeDetailFragmentArgs by navArgs()
+
+	// VIEW MODEL:
+	// Per collegare il ViewModel al Fragment su utilizza una "property delegate" (stesso funzionamento di lazy)
+	// *ATTENZIONE*: per passare al ViewModel degli argomenti bisogna utilizzare una factory
+	private val crimeDetailViewModel: CrimeDetailViewModel by viewModels {
+		CrimeDetailViewModelFactory(args.crimeId)
+	}
+
+	// OnCreateView()
+	// 1) viene chiamata dal FragmentManager della hosting activity
+	// 2) viene fatto l'inflate e bind del layout
+	// 3) viene ritornata la View
+	// *CONVENZIONE*: Non inserire nulla in più in questa funzione ma usare le funzioni chiamate successivamente
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
 	): View {
@@ -45,16 +59,16 @@ class CrimeDetailFragment : Fragment() {
 		return binding.root
 	}
 
-	// Viene chiamata immediatamente dopo la onCreateView
-	// Qui si impostano i listeners
-	@RequiresApi(33)
+	// OnViewCreated()
+	// 1) viene chiamata immediatamente dopo la onCreateView
+	// 2) qui si impostano i listeners
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
 		// Custom back navigation
 		activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, true) {
 			if (binding.crimeTitle.text.isNotBlank()) {
-				findNavController().navigateUp()
+				findNavController().navigateUp() // non si può terminare l'activity con requireActivity().finish() perché questo è un fragment
 			} else {
 				Toast.makeText(context, "ERRORE: Inserire un titolo", Toast.LENGTH_SHORT).show()
 			}
@@ -93,12 +107,6 @@ class CrimeDetailFragment : Fragment() {
 		}
 	}
 
-	// è importante liberare binding per evitare memory leaking nel momento in cui si cambia view
-	override fun onDestroyView() {
-		super.onDestroyView()
-		_binding = null
-	}
-
 	private fun updateUi(crime: Crime) {
 		binding.apply {
 			if (crimeTitle.text.toString() != crime.title) { //previene un infinite-loop con il listener
@@ -112,5 +120,11 @@ class CrimeDetailFragment : Fragment() {
 				findNavController().navigate(CrimeDetailFragmentDirections.selectDate(crime.date))
 			}
 		}
+	}
+
+	// VIEW BINDING: è importante liberare binding per evitare memory leaking quando si cambia view
+	override fun onDestroyView() {
+		super.onDestroyView()
+		_binding = null
 	}
 }

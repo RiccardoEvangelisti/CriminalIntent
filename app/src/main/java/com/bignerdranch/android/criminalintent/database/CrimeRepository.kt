@@ -1,8 +1,9 @@
-package com.bignerdranch.android.criminalintent
+package com.bignerdranch.android.criminalintent.database
 
 import android.content.Context
 import androidx.room.Room
 import com.bignerdranch.android.criminalintent.database.CrimeDatabase
+import com.bignerdranch.android.criminalintent.model.Crime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +15,7 @@ private const val DATABASE_NAME = "crime-database"
 // Singleton
 class CrimeRepository private constructor(context: Context, private val coroutineScope: CoroutineScope = GlobalScope) {
 
+	// Singleton
 	companion object {
 
 		private var INSTANCE: CrimeRepository? = null
