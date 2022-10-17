@@ -8,5 +8,5 @@ import java.util.*
 // ROOM: ogni Entity definisce la struttura di una tabella, identificata da una PrimaryKey
 @Entity
 data class Crime(
-	@PrimaryKey val id: UUID, val title: String, val date: Date, val isSolved: Boolean
+	@PrimaryKey val id: UUID, val title: String, val date: Date, val isSolved: Boolean, val suspect: String = ""
 )

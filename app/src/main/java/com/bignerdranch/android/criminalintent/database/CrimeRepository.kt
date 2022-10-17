@@ -35,7 +35,8 @@ class CrimeRepository private constructor(context: Context, private val coroutin
 	// Implementazione concreta del database
 	private val database: CrimeDatabase =
 		// crea una concreta implementazione del database
-		Room.databaseBuilder(context.applicationContext, CrimeDatabase::class.java, DATABASE_NAME)/*.createFromAsset(DATABASE_NAME)*/.build()
+		Room.databaseBuilder(context.applicationContext, CrimeDatabase::class.java, DATABASE_NAME)/*.createFromAsset(DATABASE_NAME)*/
+			.addMigrations(migration_1_2).build()
 
 	// Implementazione di tutte le funzioni
 	fun getCrimes(): Flow<List<Crime>> {

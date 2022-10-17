@@ -1,6 +1,8 @@
 package com.bignerdranch.android.criminalintent.detail
 
+import android.content.Intent
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.bignerdranch.android.criminalintent.R
 import com.bignerdranch.android.criminalintent.databinding.FragmentCrimeDetailBinding
 import com.bignerdranch.android.criminalintent.model.Crime
 import kotlinx.coroutines.launch
@@ -124,6 +127,17 @@ class CrimeDetailFragment : Fragment() {
 			crimeDate.setOnClickListener { // viene inserito qui il listener perché qui è l'unico posto dove ho accesso al crime più aggiornato
 				findNavController().navigate(CrimeDetailFragmentDirections.selectDate(crime.date))
 			}
+
+			crimeReport.setOnClickListener {
+				val reportIntent = Intent(/*tipo di Intent*/Intent.ACTION_SEND).apply {
+					type = "text/plain" // Obbligatorio
+					putExtra(Intent.EXTRA_TEXT, getCrimeReport(crime)) // Messaggio principale
+					putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject)) // Il soggetto del messaggio
+				}
+				val chooserIntent = Intent.createChooser(reportIntent, getString(R.string.send_report)) // Apre il chooser (con funzionalità di copia)
+				startActivity(chooserIntent)
+
+			}
 		}
 	}
 
@@ -131,5 +145,22 @@ class CrimeDetailFragment : Fragment() {
 	override fun onDestroyView() {
 		super.onDestroyView()
 		_binding = null
+	}
+
+	// GETSTRING()
+	// Funzione che genera il messaggio del crimine andando a prelevare dal file strings delle risorse
+	private fun getCrimeReport(crime: Crime): String {
+		val solvedString = if (crime.isSolved) {
+			getString(R.string.crime_report_solved)
+		} else {
+			getString(R.string.crime_report_unsolved)
+		}
+		val dateString = DateFormat.getDateFormat(context).format(crime.date).toString()
+		val suspectText = if (crime.suspect.isBlank()) {
+			getString(R.string.crime_report_no_suspect)
+		} else {
+			getString(R.string.crime_report_suspect, crime.suspect)
+		}
+		return getString(R.string.crime_report, crime.title, dateString, solvedString, suspectText)
 	}
 }
