@@ -35,14 +35,25 @@ class CrimeRepository private constructor(context: Context, private val coroutin
 	// Implementazione concreta del database
 	private val database: CrimeDatabase =
 		// crea una concreta implementazione del database
-		Room.databaseBuilder(context.applicationContext, CrimeDatabase::class.java, DATABASE_NAME).createFromAsset(DATABASE_NAME).build()
+		Room.databaseBuilder(context.applicationContext, CrimeDatabase::class.java, DATABASE_NAME)/*.createFromAsset(DATABASE_NAME)*/.build()
 
-	fun getCrimes(): Flow<List<Crime>> = database.crimeDao().getCrimes()
-	suspend fun getCrime(id: UUID): Crime = database.crimeDao().getCrime(id)
+	// Implementazione di tutte le funzioni
+	fun getCrimes(): Flow<List<Crime>> {
+		return database.crimeDao().getCrimes()
+	}
+
+	suspend fun getCrime(id: UUID): Crime {
+		return database.crimeDao().getCrime(id)
+	}
+
 	fun updateCrime(crime: Crime) {
 		// Viene utilizzato il GlobalScope
 		coroutineScope.launch {
 			database.crimeDao().updateCrime(crime)
 		}
+	}
+
+	suspend fun addCrime(crime: Crime) {
+		database.crimeDao().addCrime(crime)
 	}
 }

@@ -24,4 +24,9 @@ class CrimeListViewModel : ViewModel() {
 			crimeRepository.getCrimes().collect { crimes -> _crimes.value = crimes }
 		}
 	}
+
+	// E' una suspending function perché voglio continuare a navigare dopo che la UI ha chiamato questa funzione
+	suspend fun addCrime(crime: Crime) {
+		crimeRepository.addCrime(crime)
+	}
 }

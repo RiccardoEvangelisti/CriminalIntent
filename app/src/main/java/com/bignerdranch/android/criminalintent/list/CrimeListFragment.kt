@@ -1,9 +1,9 @@
 package com.bignerdranch.android.criminalintent.list
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -11,8 +11,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bignerdranch.android.criminalintent.R
 import com.bignerdranch.android.criminalintent.databinding.FragmentCrimeListBinding
+import com.bignerdranch.android.criminalintent.model.Crime
 import kotlinx.coroutines.launch
+import java.util.*
 
 class CrimeListFragment : Fragment() {
 
@@ -40,6 +43,10 @@ class CrimeListFragment : Fragment() {
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
+
+		// APPBAR: MENU
+		setupMenu()
+
 		// Coroutine per il prelievo dei dati. Lo scope è quello del ViewModel
 		viewLifecycleOwner.lifecycleScope.launch {
 
@@ -67,5 +74,38 @@ class CrimeListFragment : Fragment() {
 	override fun onDestroyView() {
 		super.onDestroyView()
 		_binding = null
+	}
+
+	// APPBAR: MENU
+	private fun setupMenu() {
+		(requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
+			override fun onPrepareMenu(menu: Menu) {
+				// Handle for example visibility of menu items
+			}
+
+			override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+				menuInflater.inflate(R.menu.fragment_crime_list, menu)
+			}
+
+			override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+				// Se il menu item è quello associato a questo fragment, esegui la funzione e ritorna true
+				return when (menuItem.itemId) {
+					R.id.new_crime -> {
+						showNewCrime()
+						true
+					}
+					// Se viene ritornato false, viene chiamata questa funzione su altri fragment o altri componenti
+					else -> false
+				}
+			}
+		}, viewLifecycleOwner, Lifecycle.State.RESUMED)
+	}
+
+	private fun showNewCrime() {
+		viewLifecycleOwner.lifecycleScope.launch {
+			val newCrime = Crime(id = UUID.randomUUID(), title = "", date = Date(), isSolved = false)
+			crimeListViewModel.addCrime(newCrime)
+			findNavController().navigate(CrimeListFragmentDirections.showCrimeDetail(newCrime.id))
+		}
 	}
 }
